@@ -45,7 +45,7 @@ var insert_address = async (req, res) => {
     }
 }
 
-// ----------------------------------------------------------------------------------------------------
+// --------------------------------------------Normal Association--------------------------------------------------------
 
 var one_to_one = async (req, res) => {
 
@@ -128,5 +128,68 @@ var many_to_many = async (req, res) => {
     }
 }
 
+// --------------------------------------Polymorphic Association-----------------------------------------------------------------
 
-module.exports = { insert_country, insert_address, one_to_one, one_to_many, many_to_many }
+var Polymorphic_one_to_many = async (req, res) => {
+    var type = req.body.type
+    console.log(type);
+    try {
+        if (type == "image") {
+            var data = await db.image.create({
+                url: 'https://picsum.photos/200/8000/other',
+                commnets: [{ comment_title: "this is image comment_111" }, { comment_title: "this is image comment_222" }]
+            }, {
+                include: [{ model: db.commnet }]
+            })
+        } else if (type == "video") {
+            var data = await db.video.create({
+                url: 'https://videocsum.photos/200/8000/other',
+                commnets: [{ comment_title: "this is video comment_111" }, { comment_title: "this is video comment_222" }]
+            }, {
+                include: [{ model: db.commnet }]
+            })
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: "Data Not Inserted!!!"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            data: data,
+            message: "Data Insert Successfully!!!"
+        })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Something Went Wrong!!!"
+        })
+    }
+}
+
+// ----------------------------------------Hooks---------------------------------------------------------------------------------
+
+var hooks = async (req, res) => {
+    try {
+
+        var data = await db.passwordMaster.create({
+            password: 'this is without hooks password'
+        })
+        console.log(data.password);
+        return res.status(200).json({
+            success: true,
+            data: data,
+            message: "Password inserted successfully!!!"
+        })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Something Went Wrong!!!"
+        })
+    }
+}
+
+module.exports = { insert_country, insert_address, one_to_one, one_to_many, many_to_many, Polymorphic_one_to_many, hooks }

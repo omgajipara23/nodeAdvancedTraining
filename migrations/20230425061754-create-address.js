@@ -47,6 +47,7 @@ module.exports = {
       fields: ['country_id']
     })
   },
+  
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('addresses');
   }
