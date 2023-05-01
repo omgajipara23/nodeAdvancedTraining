@@ -1,10 +1,12 @@
 const { Op } = require("sequelize");
 const db = require('../models');
+const faker = require('faker')
 var express = require('express')
 var bodyParser = require('body-parser');
 const address = require("../models/address");
 var app = express()
 app.use(bodyParser.json())
+app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(express.json())
 
@@ -192,4 +194,56 @@ var hooks = async (req, res) => {
     }
 }
 
-module.exports = { insert_country, insert_address, one_to_one, one_to_many, many_to_many, Polymorphic_one_to_many, hooks }
+// ------------------------------------Task-1--------------------------------------------------------------------------------------
+
+var table_file = async (req, res) => {
+    res.render('demo.ejs')
+}
+
+var alldata = async (req, res) => {
+
+    try {
+
+        const { draw, search, order, start, length } = req.query;
+
+        console.log("offset", typeof offset);
+
+        const columns = ["firstName", "lastName", "email", "phone_number"];
+
+
+        const query = {
+            where: {},
+            offset: parseInt(start) || 0,
+            limit: parseInt(length) || 10,
+            order: []
+        };
+
+        if (order && order.length > 0) {
+            const { column, dir } = order[0];
+            const columnName = req.query.columns[column].data;
+            query.order.push([columnName, dir]);
+        }
+
+        if (search.value) {
+            query.where[Op.or] = columns.map((column) => ({
+                [column]: { [Op.like]: `%${search.value}%` },
+            }));
+        }
+
+        const data = await db.site_user.findAndCountAll(query);
+
+
+        return res.json({
+            draw: parseInt(draw),
+            recordsTotal: data.count,
+            recordsFiltered: data.count,
+            data: data.rows,
+        });
+    } catch (err) {
+
+        console.log({ err });
+        return res.status(500).send(err);
+    }
+}
+
+module.exports = { insert_country, insert_address, one_to_one, one_to_many, many_to_many, Polymorphic_one_to_many, hooks, table_file, alldata }
