@@ -36,30 +36,37 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script>
-      
-      $(document).ready(function () {
-        $("#myTable").DataTable({
-        'processing' : true,
-        'serverSide' : true,
-        'searching': true,
-        'ordering': true,
-        'paging': true,
-        'pageLength': 10,
-        'lengthMenu': [[5,10,15,20,25,30,35,40,50,60], [5,10,15,20,25,30,35,40,50,60]],
-        'serverMethod' : 'get',
-        'ajax' : {
-          'url' : '/get_data'
-        },
-        'aaSorting' : [],
-        'columns' : [
-            { data : 'firstName' },
-            { data : 'lastName' },
-            { data : 'email' },
-            { data : 'phone_number' }
-        ],
+      (async () => {        
+        $(document).ready(function () {
+          $("#myTable").DataTable({
+          'processing' : true,
+          'serverSide' : true,
+          'searching': false,
+          'ordering': true,
+          'paging': true,
+          'pageLength': 10,
+          'lengthMenu': [[5,10,15,20,25,30,35,40,50,60], [5,10,15,20,25,30,35,40,50,60]],
+          'serverMethod' : 'get',
+          'ajax' : {
+            'url' : '/get_data'
+          },
+          'aaSorting' : [],
+          'columns' : [
+              { data : 'user_id' },
+              { data : 'is_default' },
+              { data : 'site_user.firstName' },
+              { data : 'site_user.lastName' },
+              { data : 'site_user.email' },
+              { data : 'site_user.phone_number' },
+              { data : 'site_user.addresses[0].street_number'},
+              { data : 'site_user.addresses[0].address_line_1'},
+              { data : 'site_user.addresses[0].city'},
+              { data : 'site_user.addresses[0].country.country_name'},
+          ],
+          });
         });
-        
-      });
+      })()
+
     </script>
   </head>
 
@@ -67,10 +74,16 @@
     <table id="myTable" class="table table-dark table-striped">
       <thead>
         <tr>
+          <th>User Id</th>
+          <th>Is Default</th>
           <th>First Name</th>
           <th>Last Name</th>
           <th>E-Mail</th>
           <th>Phone-Number</th>
+          <th>Street Number</th>
+          <th>Address</th>
+          <th>City</th>
+          <th>Country Name</th>
         </tr>
       </thead>
 

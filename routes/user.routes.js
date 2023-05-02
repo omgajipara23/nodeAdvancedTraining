@@ -1,4 +1,4 @@
-var { insert_address, insert_country, many_to_many, one_to_many, one_to_one, Polymorphic_one_to_many, table_file ,hooks , all_data, alldata} = require('../controllers/user.controller')
+var { insert_address, insert_country, many_to_many, one_to_many, one_to_one, Polymorphic_one_to_many, table_file ,hooks ,  alldata, faker_data, findAllDataWithAssocication} = require('../controllers/user.controller')
 var express = require('express')
 var app = express()
 
@@ -11,5 +11,6 @@ app.post('/ply_o_to_m', Polymorphic_one_to_many)
 app.post('/hooks',hooks)
 app.get('/',table_file)
 app.get('/get_data', alldata)
-
+app.get('/faker', faker_data)
+app.get('/demo',findAllDataWithAssocication)
 module.exports = app

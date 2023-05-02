@@ -21,5 +21,10 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'user_address',
   });
+
+  user_address.associate = function (models) {
+    user_address.belongsTo(models.address, { foreignKey: 'address_id' })
+    user_address.belongsTo(models.site_user, { foreignKey: 'user_id' })
+  }
   return user_address;
 };

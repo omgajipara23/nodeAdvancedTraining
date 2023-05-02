@@ -23,5 +23,10 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'site_user',
   });
+
+  site_user.associate = function (models) {
+    site_user.belongsToMany(models.address, { through: models.user_address, foreignKey: 'user_id' })
+  }
+
   return site_user;
 };

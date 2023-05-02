@@ -20,8 +20,8 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'perent_category',
   });
 
-  perent_category.associate = function (models){
-    perent_category.belongsToMany(models.child_category, {through : models.category_master , foreignKey : 'parent_cat_id'})
+  perent_category.associate = function (models) {
+    perent_category.belongsToMany(models.child_category, { through: models.category_master, foreignKey: 'parent_cat_id' })
   }
 
   return perent_category;

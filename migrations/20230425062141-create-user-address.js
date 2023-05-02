@@ -18,7 +18,8 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       is_default: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.STRING,
+        defaultValue : 'yes'
       },
       createdAt: {
         allowNull: false,

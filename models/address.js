@@ -26,7 +26,8 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   address.associate = function (models) {
-    address.belongsTo(models.country, { foreignKey: 'country_id' });
+    address.belongsTo(models.country, { foreignKey: 'country_id', constraints: false });
+    address.belongsToMany(models.site_user, { through: models.user_address, foreignKey: 'address_id' })
   };
 
   return address;
