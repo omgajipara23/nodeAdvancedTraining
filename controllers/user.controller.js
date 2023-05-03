@@ -343,8 +343,7 @@ var faker_data = async (req, res) => {
                 ]
             }]
         })
-        console.log(JSON.stringify(data) + "  <=== Dataaaaaaaaaaaaaaaaaaaaaaa");
-        // res.end("Data Inserted Successfully!!!")
+        console.log(JSON.stringify(data));
         return res.status(200).json({
             success: true,
             message: "Data Insert Successfully!!!"
