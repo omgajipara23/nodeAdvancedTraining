@@ -194,7 +194,7 @@ var hooks = async (req, res) => {
     }
 }
 
-// ------------------------------------Datatable With Simple Data--------------------------------------------------------------------------------------
+// ------------------------------------Datatable With Association Data--------------------------------------------------------------------------------------
 
 var table_file = async (req, res) => {
     res.render('demo.ejs')
@@ -203,69 +203,100 @@ var table_file = async (req, res) => {
 var alldata = async (req, res) => {
 
     try {
-
         const { draw, search, order, start, length } = req.query;
 
-      
-        var columns = [
-            "user_id",
-            "is_default",
-            "firstName",
-            "lastName",
-            "email",
-            "phone_number",
-            "street_number",
-            "address_line_1",
-            "city",
-            "country_name"
-        ];
-
+        const search_conditions = {
+            [Op.or]: {
+                user_id: {
+                    [Op.like]: `%${search.value}%`,
+                },
+                is_default: {
+                    [Op.like]: `%${search.value}%`,
+                },
+                "$site_user.firstName$": {
+                    [Op.like]: `%${search.value}%`,
+                },
+                "$site_user.lastName$": {
+                    [Op.like]: `%${search.value}%`,
+                },
+                "$site_user.email$": {
+                    [Op.like]: `%${search.value}%`,
+                },
+                "$site_user.phone_number$": {
+                    [Op.like]: `%${search.value}%`,
+                },
+                "$site_user.addresses.address_line_1$": {
+                    [Op.like]: `%${search.value}%`,
+                },
+                "$site_user.addresses.street_number$": {
+                    [Op.like]: `%${search.value}%`,
+                },
+                "$site_user.addresses.city$": {
+                    [Op.like]: `%${search.value}%`,
+                },
+                "$site_user.addresses.country.country_name$": {
+                    [Op.like]: `%${search.value}%`,
+                },
+            },
+        }
 
         const query = {
-            where: {},
+            where: { ...search_conditions },
             include: [{
                 model: db.site_user,
                 include: [{
                     model: db.address,
+                    subQuery: false,
                     include: [
-                        db.country
+                        db.country,
                     ]
                 }]
             }],
             offset: parseInt(start) || 0,
             limit: parseInt(length) || 10,
+            subQuery: false,
             order: []
         };
 
+
         if (order && order.length > 0) {
             const { column, dir } = order[0];
-            const columnName = req.query.columns[column].data;
-            query.order.push([columnName, dir]);
-        }
 
-        if (search.value) {
-            query.where[Op.or] = columns.map((column) => ({
-                [column]: { [Op.like]: `%${search.value}%` },
-            }));
+            let columnName = req.query.columns[column].data;
+
+            if (column >= 2 && column <= 5) {
+                if (columnName.includes(".")) {
+                    let curr = columnName.split(".");
+                    var tableName = curr[0]
+                    console.log(tableName);
+                    columnName = curr[1];
+                    console.log(curr[1]);
+                    query.order.push([tableName, columnName, dir]);
+                }
+            }
+            else if (column >= 6 && column <= 8) {
+                let curr = columnName.split(".");
+                var tableName = curr[1]
+                console.log(tableName);
+                columnName = curr[2];
+                console.log(curr[1]);
+                query.order.push([db.site_user, db.address, columnName, dir]);
+            }
+            else if (column == 9) {
+                let curr = columnName.split(".");
+                var tableName = curr[2]
+                console.log(tableName);
+                columnName = curr[3];
+                console.log(curr[1]);
+                query.order.push([db.site_user, db.address, db.country, columnName, dir]);
+            }
+            else {
+                query.order.push([columnName, dir]);
+            }
+
         }
 
         const data = await db.user_address.findAndCountAll(query);
-        // console.log(data);
-
-        // console.log(data.rows[0].dataValues.user_id);
-        // console.log(data.rows[0].dataValues.is_default);
-        // console.log(data.rows[0].dataValues);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.firstName);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.lastName);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.email);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.phone_number);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.addresses[0].dataValues.street_number);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.addresses[0].dataValues.address_line_1);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.addresses[0].dataValues.city);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.addresses[0].dataValues.country.dataValues.country_name);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.street_number);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.address_line_1);
-        // console.log(data.rows[0].dataValues.site_user.dataValues.city);
 
         return res.json({
             draw: parseInt(draw),
@@ -274,7 +305,6 @@ var alldata = async (req, res) => {
             data: data.rows,
         });
     } catch (err) {
-
         console.log({ err });
         return res.status(500).send(err);
     }
@@ -328,178 +358,5 @@ var faker_data = async (req, res) => {
     }
 }
 
-// --------------------------------------Detatable With Association Data-----------------------------------------------------------
 
-var datatableWithAssociationData = async (req, res) => {
-    try {
-        var { draw, search, order, start, length } = req.query;
-
-        var columns = [
-            "user_id",
-            "is_default",
-            "firstName",
-            "lastName",
-            "email",
-            "phone_number",
-            "street_number",
-            "address_line_1",
-            "city",
-            "country_name"
-        ];
-
-        console.log(draw, start, order, length);
-
-        const query = {
-            where: {},
-            offset: parseInt(start) || 0,
-            limit: parseInt(length) || 10,
-            order: [],
-        };
-
-        if (order.length > 0) {
-            const { column, dir } = order[0];
-
-            console.log(column, "no of column");
-            let columnName = req.query.columns[column].data;
-            console.log(columnName, "column name");
-
-            // if (columnName.includes("team")) {
-            //   let curr = columnName.split(".");
-            //   columnName = curr[1];
-            //   console.log(curr[1]);
-            // }
-
-            query.order.push([columnName, dir]);
-        }
-
-        // let value = [Op.or]:{}columns.map((column) => ({
-        //   [column]: { [Op.like]: `%${search.value}%` },
-        // }));
-
-        console.log(query, "queryyyyyyyy");
-
-        const data = await player.findAll({
-            order: query.order,
-            offset: query.offset,
-            limit: query.limit,
-
-            where: {
-                [Op.or]: {
-                    "$team.teamName$": {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    "$team.id$": {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    "$team.teamPlace$": {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    "$team.totalPerson$": {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    id: {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    playerName: {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    playerNo: {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    playerAge: {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                },
-            },
-            include: [
-                {
-                    model: team,
-                },
-            ],
-        });
-
-        const filtered = await data.length;
-
-        console.log(filtered, "filtererrr");
-        const dataCount = await player.count({
-            where: {
-                [Op.or]: {
-                    "$team.teamName$": {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    "$team.id$": {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    "$team.teamPlace$": {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    "$team.totalPerson$": {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    id: {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    playerName: {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    playerNo: {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                    playerAge: {
-                        [Op.like]: `%${search.value}%`,
-                    },
-                },
-            },
-            include: [
-                {
-                    model: team,
-                },
-            ],
-        });
-
-        // console.log(dataCount, "totallllllllllllllll");
-
-        // console.log(data, "orwoiejr");
-
-        return res.json({
-            draw: draw,
-            recordsTotal: dataCount,
-            recordsFiltered: dataCount,
-            data: data,
-        });
-
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            success: false,
-            error: error,
-            message: "Something Went Wrong!!!"
-        })
-
-    }
-}
-
-var findAllDataWithAssocication = async (req, res) => {
-    var data = await db.user_address.findAll({
-        where: {
-            id: 1
-        },
-        include: [{
-            model: db.site_user,
-            include: [{
-                model: db.address,
-                include: [
-                    db.country
-                ]
-            }]
-
-        }]
-    })
-    console.log(data);
-    return res.json({
-        data: data
-    })
-}
-
-
-module.exports = { insert_country, insert_address, one_to_one, one_to_many, many_to_many, Polymorphic_one_to_many, hooks, table_file, alldata, faker_data, findAllDataWithAssocication }
+module.exports = { insert_country, insert_address, one_to_one, one_to_many, many_to_many, Polymorphic_one_to_many, hooks, table_file, alldata, faker_data }

@@ -12,5 +12,5 @@ app.post('/hooks',hooks)
 app.get('/',table_file)
 app.get('/get_data', alldata)
 app.get('/faker', faker_data)
-app.get('/demo',findAllDataWithAssocication)
+
 module.exports = app
