@@ -301,7 +301,6 @@ var alldata = async (req, res) => {
             else {
                 query.order.push([columnName, dir]);
             }
-
         }
 
         const data = await db.user_address.findAndCountAll(query);
@@ -322,46 +321,51 @@ var alldata = async (req, res) => {
 
 var faker_data = async (req, res) => {
 
-    var design = {
-        firstName: faker.name.firstName(),
-        lastName: faker.name.lastName(),
-        email: faker.internet.email(),
-        phone_number: faker.phone.phoneNumberFormat(),
-        password: faker.internet.password(8),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        addresses: [{
-            street_number: Math.floor((Math.random() * 100) + 1),
-            address_line_1: faker.address.streetName(),
-            address_line_2: faker.address.streetName(),
-            city: faker.address.city(),
-            region: faker.address.country(),
-            country: {
-                country_name: faker.address.country(),
-            }
-        }]
-    }
+    for (let i = 0; i <= 10000; i++) {
 
-    try {
-        var data = await db.site_user.create(design, {
-            include: [{
-                model: db.address,
-                include: [
-                    db.country
-                ]
+        console.log("in a loop");
+
+        var design = {
+            firstName: faker.name.firstName(),
+            lastName: faker.name.lastName(),
+            email: faker.internet.email(),
+            phone_number: faker.phone.phoneNumberFormat(),
+            password: faker.internet.password(8),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            addresses: [{
+                street_number: Math.floor((Math.random() * 100) + 1),
+                address_line_1: faker.address.streetName(),
+                address_line_2: faker.address.streetName(),
+                city: faker.address.city(),
+                region: faker.address.country(),
+                country: {
+                    country_name: faker.address.country(),
+                }
             }]
-        })
-        console.log(JSON.stringify(data));
-        return res.status(200).json({
-            success: true,
-            message: "Data Insert Successfully!!!"
-        })
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            success: false,
-            message: "Something Went Wrong!!!"
-        })
+        }
+
+        try {
+            var data = await db.site_user.create(design, {
+                include: [{
+                    model: db.address,
+                    include: [
+                        db.country
+                    ]
+                }]
+            })
+            console.log(JSON.stringify(data));
+            // return res.status(200).json({
+            //     success: true,
+            //     message: "Data Insert Successfully!!!"
+            // })
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({
+                success: false,
+                message: "Something Went Wrong!!!"
+            })
+        }
     }
 }
 
