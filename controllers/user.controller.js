@@ -51,6 +51,8 @@ var insert_address = async (req, res) => {
 
 var one_to_one = async (req, res) => {
 
+    const t = await db.sequelize.transaction()
+
     try {
         const data = await db.country.create({
             country_name: "australia",
@@ -63,15 +65,21 @@ var one_to_one = async (req, res) => {
             },
         },
             {
-                include: [{ model: db.address }]
-            }
+                include: [{ model: db.address }],
+                transaction: t
+            },
+
         )
+
+        await t.commit()
         console.log(data);
         return res.status(200).json({
             success: true,
             message: "Data Inserted !!!"
         })
     } catch (error) {
+
+        await t.rollback();
         console.log(error);
         res.status(500).json({
             success: false,

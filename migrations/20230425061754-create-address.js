@@ -10,34 +10,39 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       street_number: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false
       },
       address_line_1: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       address_line_2: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       city: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       region: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
       },
       country_id: {
         type: Sequelize.INTEGER,
-        allowNull:false
+        allowNull: false
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
     });
-    
+
     await queryInterface.addConstraint('addresses', {
       references: {
         field: 'id',
@@ -47,7 +52,7 @@ module.exports = {
       fields: ['country_id']
     })
   },
-  
+
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('addresses');
   }
